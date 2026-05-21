@@ -23,6 +23,13 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
     if (onAnalyze) onAnalyze(sql, dialect);
   };
 
+  const handleKeyDown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleAnalyze();
+    }
+  };
+
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
@@ -54,23 +61,26 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
           spellCheck="false"
           value={sql}
           onChange={(e) => setSql(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
 
-        <div className="flex flex-wrap gap-2.5 mt-3.5">
-          <button onClick={handleAnalyze} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-primary text-white text-sm font-extrabold hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
-            <Play className="w-4 h-4" />
-            Analizar
-          </button>
-          <button onClick={handleClear} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#e5e7eb] text-[#111827] text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
-            <RotateCcw className="w-4 h-4" />
-            Limpiar
-          </button>
-          <button onClick={() => setShowHelp(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-help text-white text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
-            <HelpCircle className="w-4 h-4" />
-            Ayuda
-          </button>
+        <div className="flex items-center justify-between flex-wrap gap-2.5 mt-3.5">
+          <div className="flex flex-wrap gap-2.5">
+            <button onClick={handleAnalyze} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-primary text-white text-sm font-extrabold hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
+              <Play className="w-4 h-4" />
+              Analizar
+            </button>
+            <button onClick={handleClear} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#e5e7eb] text-[#111827] text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
+              <RotateCcw className="w-4 h-4" />
+              Limpiar
+            </button>
+            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-help text-white text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
+              <HelpCircle className="w-4 h-4" />
+              Ayuda
+            </button>
+          </div>
+          <span className="text-xs text-muted/60 font-mono">Ctrl+Enter</span>
         </div>
-      </div>
 
       <AnimatePresence>
         {showHelp && (
