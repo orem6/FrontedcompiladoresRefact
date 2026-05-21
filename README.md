@@ -1,78 +1,121 @@
 # SQL Compiler UI
 
-Dashboard visual para un compilador SQL con análisis léxico, sintáctico y semántico. Conectado al backend Spring Boot REST API.
+Dashboard para un compilador SQL con análisis léxico, sintáctico y semántico. Consume una API REST Spring Boot.
 
-## Tecnologías
+## Requisitos del Sistema
 
-- **React** — Librería de UI
-- **Vite** — Bundler y dev server
-- **TailwindCSS v4** — Estilos utilitarios
-- **Framer Motion** — Animaciones
-- **Lucide React** — Iconos
+- **Node.js** 18+ (recomendado 22 LTS)
+- **npm** 9+ (viene con Node.js)
+- **Backend Spring Boot** corriendo en `http://localhost:8080`
 
-## Requisitos
+## Stack Tecnológico
 
-- Node.js 18+
-- Backend Spring Boot corriendo en `http://localhost:8080`
+| Runtime     | Dev                          |
+| ----------- | ---------------------------- |
+| React 19    | Vite 8                       |
+| React DOM 19| Tailwind CSS v4              |
+| Framer Motion 12 | ESLint 10              |
+| Lucide React 1   | @tailwindcss/vite       |
 
-## Instalación
+Lenguaje: **JavaScript (JSX)** — no usa TypeScript.
+
+## Instalación desde Cero
 
 ```bash
+# 1. Clonar el repositorio
+git clone <url-del-repositorio>
 cd FrontedcompiladoresRefact
+
+# 2. Instalar dependencias
 npm install
+
+# 3. (Opcional) Configurar variable de entorno
+#    Si el backend corre en otro puerto, copiar y editar:
+cp .env.example .env
+
+# 4. Iniciar servidor de desarrollo
 npm run dev
 ```
 
-El frontend inicia en `http://localhost:5173`. Las peticiones a `/api` se proxy al backend.
+La aplicación se abre en `http://localhost:5173`.
 
-## Funcionalidades
+## Variables de Entorno
 
-- **Editor SQL** con resaltado de sintaxis (textarea) y selector de dialecto (MySQL, PostgreSQL, SQL Server)
-- **Conexión a BD** con formulario de parámetros y prueba de conexión al backend
-- **Análisis léxico/sintáctico** sin necesidad de base de datos
-- **Análisis semántico completo** contra base de datos real (requiere conexión)
-- **Visualización de resultados** en 4 tabs: Consola, Tokens, Semántico, Errores
-- **Indicador de estado de conexión** en tiempo real
+| Variable        | Valor por defecto | Descripción                     |
+| --------------- | ----------------- | ------------------------------- |
+| `VITE_API_URL`  | `/api`            | URL base del backend (proxy)    |
+
+Sin `.env`, Vite proxyea `/api` a `http://localhost:8080` (configurado en `vite.config.js`).
 
 ## Scripts
 
-```bash
-npm run dev      # Servidor de desarrollo (http://localhost:5173)
-npm run build    # Build de producción
-npm run preview  # Vista previa del build
-npm run lint     # ESLint
+| Comando             | Descripción                           |
+| ------------------- | ------------------------------------- |
+| `npm run dev`       | Servidor de desarrollo (Vite)         |
+| `npm run build`     | Build de producción a `dist/`         |
+| `npm run preview`   | Vista previa del build de producción  |
+| `npm run lint`      | Ejecutar ESLint en todo el proyecto   |
+
+## Funcionalidades
+
+- **Editor SQL** con selector de dialecto (MySQL, PostgreSQL, SQL Server)
+- **Conexión a BD** mediante formulario con prueba de conexión al backend
+- **Análisis léxico/sintáctico** sin necesidad de base de datos
+- **Análisis completo** (léxico + sintáctico + semántico) con BD conectada
+- **Visualización** en 4 pestañas: Consola, Tokens, Semántico, Errores
+- **Indicador visual** de estado de conexión en tiempo real
+
+## Endpoints del Backend
+
+| Método | Endpoint                                  | Uso                        |
+| ------ | ----------------------------------------- | -------------------------- |
+| GET    | `/api/compiler/health`                    | Health check               |
+| GET    | `/api/compiler/dialects`                  | Listar dialectos soportados|
+| POST   | `/api/compiler/analyze/lexical-syntax`    | Análisis léxico/sintáctico |
+| POST   | `/api/compiler/analyze/full`              | Análisis completo          |
+| POST   | `/api/compiler/connection/test`           | Probar conexión a BD       |
+
+## Estructura del Proyecto
+
+```
+FrontedcompiladoresRefact/
+├── .env.example          # Variables de entorno (ejemplo)
+├── .nvmrc                # Versión de Node.js recomendada
+├── index.html            # HTML principal
+├── package.json          # Dependencias y scripts
+├── vite.config.js        # Configuración de Vite + proxy
+├── eslint.config.js      # Configuración de ESLint
+├── public/
+│   └── favicon.svg
+├── src/
+│   ├── main.jsx          # Entry point React
+│   ├── App.jsx           # Componente raíz (orquestador)
+│   ├── index.css         # Estilos globales + Tailwind + tema
+│   ├── components/
+│   │   ├── layout/
+│   │   │   └── Header.jsx
+│   │   └── dashboard/
+│   │       ├── SqlEditor.jsx
+│   │       ├── ConnectionPanel.jsx
+│   │       └── ResultTabs.jsx
+│   ├── data/
+│   │   └── mockData.js
+│   └── services/
+│       └── api.js
+└── docs/
+    ├── ESTRUCTURA_FRONTEND.md
+    └── CONEXION_FRONTEND_BACKEND.md
 ```
 
-## Estructura
+## Solución de Problemas
 
-```
-src/
-├── components/
-│   ├── layout/         # Header con estado de conexión
-│   └── dashboard/      # SqlEditor, ConnectionPanel, ResultTabs
-├── services/           # Capa de servicios HTTP (api.js)
-├── data/               # Datos mock (dialectos, SQL default)
-├── App.jsx             # Orquestador principal
-├── main.jsx            # Entry point
-└── index.css           # Estilos globales y tema
-```
+| Problema                           | Causa probable                  | Solución                                         |
+| ---------------------------------- | ------------------------------- | ------------------------------------------------ |
+| `npm install` falla                | Node.js versión incorrecta      | Usar Node.js 18+ (`nvm use` si tienes `.nvmrc`)  |
+| Error de conexión al analizar      | Backend no está corriendo       | Iniciar el backend Spring Boot en `:8080`        |
+| CORS en consola del navegador      | Backend sin configuración CORS  | El proxy de Vite lo maneja en desarrollo         |
+| Puerto ocupado                     | Otro proceso en `:5173`         | `npx vite --port 3000` o cambiar en `vite.config.js` |
 
-## Endpoints del Backend Consumidos
+## Tests
 
-| Endpoint | Uso |
-|---|---|
-| `GET /api/compiler/health` | Health check |
-| `GET /api/compiler/dialects` | Listar dialectos |
-| `POST /api/compiler/analyze/lexical-syntax` | Análisis léxico/sintáctico |
-| `POST /api/compiler/analyze/full` | Análisis completo con semántica |
-| `POST /api/compiler/connection/test` | Prueba de conexión a BD |
-
-## Configuración
-
-Crear archivo `.env` en la raíz (ya incluido):
-
-```env
-VITE_API_URL=http://localhost:8080
-```
-
-Si el backend corre en otro puerto, cambiar el valor. En desarrollo también funciona con el proxy de Vite configurado en `vite.config.js`.
+El proyecto no incluye framework de pruebas configurado actualmente.

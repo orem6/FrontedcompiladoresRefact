@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { ArrowLeft } from 'lucide-react';
 import Header from './components/layout/Header';
 import SqlEditor from './components/dashboard/SqlEditor';
 import ConnectionPanel from './components/dashboard/ConnectionPanel';
@@ -9,7 +8,6 @@ import { analyzeLexicalSyntax, analyzeFull } from './services/api';
 function App() {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [, setCleared] = useState(false);
   const [selectedDialect, setSelectedDialect] = useState('MYSQL');
   const [connectionStatus, setConnectionStatus] = useState('desconectado');
   const [connectionConfig, setConnectionConfig] = useState(null);
@@ -31,7 +29,6 @@ function App() {
   const handleAnalyze = useCallback(async (sql, dialect) => {
     if (!sql || !sql.trim()) return;
     setLoading(true);
-    setCleared(false);
     try {
       let res;
       if (connectionConfig && connectionConfig.connected) {
@@ -65,7 +62,6 @@ function App() {
 
   const handleClear = useCallback(() => {
     setResponse(null);
-    setCleared(true);
   }, []);
 
   return (
@@ -80,13 +76,6 @@ function App() {
 
         <div className="mt-[22px]">
           <ResultTabs response={response} loading={loading} />
-        </div>
-
-        <div className="mt-[22px] flex justify-end">
-          <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-[#374151] text-white text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
-            <ArrowLeft className="w-4 h-4" />
-            Regresar
-          </button>
         </div>
       </div>
     </div>
