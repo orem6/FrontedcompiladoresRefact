@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Plug, PlugZap } from 'lucide-react';
 import { testConnection } from '../../services/api';
 
-const PORTS = { MYSQL: '3306', POSTGRESQL: '5432', SQL_SERVER: '1433' };
+const PORTS = { MYSQL: '3306', POSTGRESQL: '5432', SQL_SERVER: '1433', CASSANDRA: '9042', MONGODB: '27017' };
+const SQL_DIALECTS = ['MYSQL', 'POSTGRESQL', 'SQL_SERVER'];
 
 export default function ConnectionPanel({ dialect, onConnectionChange }) {
   const [host, setHost] = useState('localhost');
@@ -16,9 +17,15 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
 
   useEffect(() => {
     if (PORTS[dialect]) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPort(PORTS[dialect]);
     }
+    if (!SQL_DIALECTS.includes(dialect)) {
+      setUsername('');
+      setPassword('');
+    } else if (!username) {
+      setUsername('root');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialect]);
 
   const getConfig = () => ({
@@ -91,8 +98,12 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
           <div className="col-span-2">
             <Field label="Base de datos" id="database" value={database} onChange={setDatabase} placeholder="nombre_base_datos" />
           </div>
-          <Field label="Usuario" id="user" value={username} onChange={setUsername} placeholder="root" />
-          <Field label="Contraseña" id="password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+          {SQL_DIALECTS.includes(dialect) && (
+            <Field label="Usuario" id="user" value={username} onChange={setUsername} placeholder="root" />
+          )}
+          {SQL_DIALECTS.includes(dialect) && (
+            <Field label="Contraseña" id="password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-3 mt-[18px] flex-wrap">
