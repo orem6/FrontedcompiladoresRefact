@@ -14,6 +14,7 @@ export default function ResultTabs({ response, loading }) {
 
   useEffect(() => {
     if (response) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActive('console');
     }
   }, [response]);

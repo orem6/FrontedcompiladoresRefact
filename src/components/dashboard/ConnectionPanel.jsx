@@ -16,6 +16,7 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
 
   useEffect(() => {
     if (PORTS[dialect]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPort(PORTS[dialect]);
     }
   }, [dialect]);
