@@ -1,6 +1,20 @@
 import { motion } from 'framer-motion';
 
-export default function Header() {
+export default function Header({ connectionStatus = 'desconectado' }) {
+  const dotColor = {
+    desconectado: 'bg-danger',
+    conectando: 'bg-warning',
+    conectado: 'bg-success',
+    error: 'bg-danger',
+  };
+
+  const statusLabel = {
+    desconectado: 'Desconectado',
+    conectando: 'Conectando...',
+    conectado: 'Conectado',
+    error: 'Error de conexión',
+  };
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -19,8 +33,8 @@ export default function Header() {
       </div>
 
       <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-border text-sm text-muted shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
-        <span className="w-[9px] h-[9px] rounded-full bg-danger" />
-        Estado de conexión: <strong className="text-text">Desconectado</strong>
+        <span className={`w-[9px] h-[9px] rounded-full ${dotColor[connectionStatus] || 'bg-danger'}`} />
+        Estado de conexión: <strong className="text-text">{statusLabel[connectionStatus] || 'Desconectado'}</strong>
       </div>
     </motion.header>
   );

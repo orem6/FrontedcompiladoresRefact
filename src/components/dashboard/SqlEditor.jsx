@@ -3,12 +3,23 @@ import { motion } from 'framer-motion';
 import { Play, RotateCcw, HelpCircle } from 'lucide-react';
 import { dialects, defaultSql } from '../../data/mockData';
 
-export default function SqlEditor({ onAnalyze, onClear }) {
+export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
   const [sql, setSql] = useState(defaultSql);
+  const [dialect, setDialect] = useState('MYSQL');
+
+  const handleDialectChange = (e) => {
+    const val = e.target.value;
+    setDialect(val);
+    if (onDialectChange) onDialectChange(val);
+  };
 
   const handleClear = () => {
     setSql('');
     onClear();
+  };
+
+  const handleAnalyze = () => {
+    if (onAnalyze) onAnalyze(sql, dialect);
   };
 
   return (
@@ -24,11 +35,14 @@ export default function SqlEditor({ onAnalyze, onClear }) {
           <label htmlFor="dialect" className="text-[13px] font-bold text-[#374151]">Motor de base de datos</label>
           <select
             id="dialect"
+            value={dialect}
+            onChange={handleDialectChange}
             className="w-full border border-border bg-white text-text rounded-[10px] px-3 py-2.5 text-sm outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] transition-all"
           >
-            {dialects.map((d) => (
-              <option key={d}>{d}</option>
-            ))}
+            {dialects.map((d) => {
+              const val = d === 'SQL Server' ? 'SQL_SERVER' : d.toUpperCase();
+              return <option key={d} value={val}>{d}</option>;
+            })}
           </select>
         </div>
       </div>
@@ -42,7 +56,7 @@ export default function SqlEditor({ onAnalyze, onClear }) {
         />
 
         <div className="flex flex-wrap gap-2.5 mt-3.5">
-          <button onClick={onAnalyze} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-primary text-white text-sm font-extrabold hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
+          <button onClick={handleAnalyze} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-primary text-white text-sm font-extrabold hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
             <Play className="w-4 h-4" />
             Analizar
           </button>
