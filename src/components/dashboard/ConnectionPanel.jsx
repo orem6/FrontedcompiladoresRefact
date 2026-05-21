@@ -29,19 +29,25 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
     password,
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleConnect = async () => {
     setLoading(true);
     setStatus('conectando');
+    setErrorMessage('');
     try {
       const res = await testConnection(getConfig());
       if (res.valid) {
         setStatus('conectado');
+        setErrorMessage('');
         if (onConnectionChange) onConnectionChange({ ...getConfig(), connected: true });
       } else {
         setStatus('error');
+        setErrorMessage(res.message || 'Error de conexion a la base de datos.');
       }
-    } catch {
+    } catch (err) {
       setStatus('error');
+      setErrorMessage(err.message || 'Error de conexion a la base de datos.');
     } finally {
       setLoading(false);
     }
@@ -111,6 +117,13 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
             {statusLabel[status]}
           </span>
         </div>
+
+        {errorMessage && (
+          <div className="mt-3 p-3 rounded-[10px] bg-[#fee2e2] border border-[#fecaca] text-sm text-[#991b1b]">
+            <p className="font-bold">Error de conexión</p>
+            <p className="mt-0.5 text-[#b91c1c]/80">{errorMessage}</p>
+          </div>
+        )}
       </div>
     </motion.div>
   );
