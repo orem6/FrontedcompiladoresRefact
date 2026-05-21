@@ -3,9 +3,10 @@ const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const API_PREFIX = `${BASE_URL}/compiler`;
 
 async function request(url, options = {}) {
+  const { headers: customHeaders, ...rest } = options;
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
+    ...rest,
+    headers: { 'Content-Type': 'application/json', ...customHeaders },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
