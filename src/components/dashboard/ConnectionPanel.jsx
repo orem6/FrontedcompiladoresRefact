@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plug, PlugZap } from 'lucide-react';
 import { testConnection } from '../../services/api';
+
+const PORTS = { MYSQL: '3306', POSTGRESQL: '5432', SQL_SERVER: '1433' };
 
 export default function ConnectionPanel({ dialect, onConnectionChange }) {
   const [host, setHost] = useState('localhost');
@@ -11,6 +13,12 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('desconectado');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (PORTS[dialect]) {
+      setPort(PORTS[dialect]);
+    }
+  }, [dialect]);
 
   const getConfig = () => ({
     dialect,
