@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Plug, PlugZap } from 'lucide-react';
 import { testConnection } from '../../services/api';
 
-export default function ConnectionPanel({ onConnectionChange }) {
+export default function ConnectionPanel({ dialect, onConnectionChange }) {
   const [host, setHost] = useState('localhost');
   const [port, setPort] = useState('3306');
   const [database, setDatabase] = useState('');
@@ -13,6 +13,7 @@ export default function ConnectionPanel({ onConnectionChange }) {
   const [loading, setLoading] = useState(false);
 
   const getConfig = () => ({
+    dialect,
     host,
     port: parseInt(port, 10) || 3306,
     database,

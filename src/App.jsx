@@ -10,6 +10,7 @@ function App() {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [, setCleared] = useState(false);
+  const [selectedDialect, setSelectedDialect] = useState('MYSQL');
   const [connectionStatus, setConnectionStatus] = useState('desconectado');
   const [connectionConfig, setConnectionConfig] = useState(null);
 
@@ -23,6 +24,10 @@ function App() {
     }
   }, []);
 
+  const handleDialectChange = useCallback((dialect) => {
+    setSelectedDialect(dialect);
+  }, []);
+
   const handleAnalyze = useCallback(async (sql, dialect) => {
     if (!sql || !sql.trim()) return;
     setLoading(true);
@@ -31,7 +36,7 @@ function App() {
       let res;
       if (connectionConfig && connectionConfig.connected) {
         res = await analyzeFull(sql, dialect, {
-          dialect,
+          dialect: connectionConfig.dialect,
           host: connectionConfig.host,
           port: connectionConfig.port,
           database: connectionConfig.database,
@@ -69,8 +74,8 @@ function App() {
         <Header connectionStatus={connectionStatus} />
 
         <div className="grid grid-cols-[1.8fr_1fr] gap-[22px] items-start max-lg:grid-cols-1">
-          <SqlEditor onAnalyze={handleAnalyze} onClear={handleClear} />
-          <ConnectionPanel onConnectionChange={handleConnectionChange} />
+          <SqlEditor onAnalyze={handleAnalyze} onClear={handleClear} onDialectChange={handleDialectChange} />
+          <ConnectionPanel dialect={selectedDialect} onConnectionChange={handleConnectionChange} />
         </div>
 
         <div className="mt-[22px]">
