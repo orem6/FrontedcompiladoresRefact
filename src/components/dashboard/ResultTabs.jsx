@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Hash, Brain, AlertTriangle, Loader } from 'lucide-react';
 
@@ -11,6 +11,13 @@ const tabs = [
 
 export default function ResultTabs({ response, loading }) {
   const [active, setActive] = useState('console');
+
+  useEffect(() => {
+    if (response) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActive('console');
+    }
+  }, [response]);
 
   const hasResults = response !== null;
 
