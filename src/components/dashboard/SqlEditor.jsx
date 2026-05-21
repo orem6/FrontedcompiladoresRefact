@@ -82,6 +82,8 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
           <span className="text-xs text-muted/60 font-mono">Ctrl+Enter</span>
         </div>
 
+      </div>
+
       <AnimatePresence>
         {showHelp && (
           <HelpModal onClose={() => setShowHelp(false)} />
