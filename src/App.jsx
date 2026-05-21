@@ -32,13 +32,13 @@ function App() {
     try {
       let res;
       if (connectionConfig && connectionConfig.connected) {
+        const isSql = ['MYSQL', 'POSTGRESQL', 'SQL_SERVER'].includes(connectionConfig.dialect);
         res = await analyzeFull(sql, dialect, {
           dialect: connectionConfig.dialect,
           host: connectionConfig.host,
           port: connectionConfig.port,
           database: connectionConfig.database,
-          username: connectionConfig.username,
-          password: connectionConfig.password,
+          ...(isSql ? { username: connectionConfig.username, password: connectionConfig.password } : {}),
         });
       } else {
         res = await analyzeLexicalSyntax(sql, dialect);
