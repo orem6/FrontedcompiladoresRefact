@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Play, RotateCcw, HelpCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, RotateCcw, HelpCircle, X } from 'lucide-react';
 import { dialects, defaultSql } from '../../data/mockData';
 
 export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
   const [sql, setSql] = useState(defaultSql);
   const [dialect, setDialect] = useState('MYSQL');
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleDialectChange = (e) => {
     const val = e.target.value;
@@ -64,12 +65,62 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
             <RotateCcw className="w-4 h-4" />
             Limpiar
           </button>
-          <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-help text-white text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
+          <button onClick={() => setShowHelp(true)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] bg-help text-white text-sm font-extrabold hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(15,23,42,0.12)] transition-all">
             <HelpCircle className="w-4 h-4" />
             Ayuda
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showHelp && (
+          <HelpModal onClose={() => setShowHelp(false)} />
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+const sqlExamples = [
+  { label: 'SELECT', sql: 'SELECT c.id, c.nombre\nFROM clientes c\nWHERE c.estado = 1\nORDER BY c.nombre ASC;' },
+  { label: 'INSERT', sql: 'INSERT INTO usuarios (nombre, email)\nVALUES (\'Juan\', \'juan@email.com\');' },
+  { label: 'UPDATE', sql: 'UPDATE productos\nSET precio = 99.99\nWHERE id = 1;' },
+  { label: 'DELETE', sql: 'DELETE FROM pedidos\nWHERE estado = \'cancelado\';' },
+  { label: 'CREATE TABLE', sql: 'CREATE TABLE empleados (\n  id INT PRIMARY KEY,\n  nombre VARCHAR(100),\n  salario DECIMAL(10,2)\n);' },
+  { label: 'JOIN', sql: 'SELECT o.id, c.nombre\nFROM ordenes o\nINNER JOIN clientes c ON c.id = o.cliente_id\nLEFT JOIN pagos p ON p.orden_id = o.id;' },
+];
+
+function HelpModal({ onClose }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.92, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.92, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-[16px] shadow-[0_20px_60px_rgba(15,23,42,0.15)] max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-bold text-text">Ayuda - Ejemplos SQL</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-2 transition-colors">
+            <X className="w-5 h-5 text-muted" />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          {sqlExamples.map((ex) => (
+            <div key={ex.label} className="rounded-[10px] border border-border overflow-hidden">
+              <div className="px-4 py-2 bg-surface-2 text-xs font-bold text-muted uppercase tracking-wide">{ex.label}</div>
+              <pre className="px-4 py-3 bg-editor-bg text-editor-text font-mono text-sm leading-relaxed overflow-x-auto whitespace-pre-wrap">{ex.sql}</pre>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
