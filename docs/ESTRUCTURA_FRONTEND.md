@@ -9,18 +9,22 @@ FrontedcompiladoresRefact/
 │   │   ├── layout/
 │   │   │   └── Header.jsx             # Cabecera con estado de conexión
 │   │   └── dashboard/
-│   │       ├── SqlEditor.jsx          # Editor SQL + selector de dialecto
+│   │       ├── SqlEditor.jsx          # Editor de instrucciones + targetCollection MongoDB
 │   │       ├── ConnectionPanel.jsx    # Formulario de conexión a BD
-│   │       └── ResultTabs.jsx         # Visor de resultados (4 tabs)
+│   │       └── ResultTabs.jsx         # Visor de resultados + validatedObjects
 │   ├── data/
-│   │   └── mockData.js                # Datos mock (dialectos, SQL default)
+│   │   └── mockData.js                # Dialectos oficiales y defaults
 │   ├── services/
 │   │   └── api.js                     # Capa de servicios HTTP para backend
+│   ├── test/
+│   │   └── setup.js                   # Setup de Vitest
 │   ├── App.jsx                        # Componente raíz (orquestador)
 │   ├── main.jsx                       # Entry point React
 │   └── index.css                      # Estilos globales + Tailwind + tema
 ├── docs/
-│   ├── CONEXION_FRONTEND_BACKEND.md   # Documentación de integración
+│   ├── CONEXION_FRONTEND_BACKEND.md   # Documentacion de integracion
+│   ├── CONTRATO_API_FRONTEND.md       # Contrato API consumido por frontend
+│   ├── NOSQL_FRONTEND.md              # Reglas NoSQL (MongoDB/Cassandra)
 │   └── ESTRUCTURA_FRONTEND.md         # Este archivo
 ├── .env                               # VITE_API_URL
 ├── index.html                         # HTML principal

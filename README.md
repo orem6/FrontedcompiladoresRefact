@@ -1,6 +1,6 @@
-# SQL Compiler UI
+# SQL/NoSQL Compiler UI
 
-Dashboard para un compilador SQL con análisis léxico, sintáctico y semántico. Consume una API REST Spring Boot.
+Dashboard para un compilador SQL/NoSQL con analisis lexico, sintactico y semantico. Consume una API REST Spring Boot.
 
 ## Requisitos del Sistema
 
@@ -55,15 +55,23 @@ Sin `.env`, Vite proxyea `/api` a `http://localhost:8080` (configurado en `vite.
 | `npm run build`     | Build de producción a `dist/`         |
 | `npm run preview`   | Vista previa del build de producción  |
 | `npm run lint`      | Ejecutar ESLint en todo el proyecto   |
+| `npm run test`      | Ejecutar pruebas Vitest               |
 
 ## Funcionalidades
 
-- **Editor SQL** con selector de dialecto (MySQL, PostgreSQL, SQL Server)
+- **Editor de instrucciones** con selector de dialecto (MySQL, PostgreSQL, SQL Server, MongoDB, Cassandra CQL)
 - **Conexión a BD** mediante formulario con prueba de conexión al backend
-- **Análisis léxico/sintáctico** sin necesidad de base de datos
-- **Análisis completo** (léxico + sintáctico + semántico) con BD conectada
+- **Analisis lexico/sintactico** sin necesidad de base de datos
+- **Analisis completo** (lexico + sintactico + semantico) con BD conectada
 - **Visualización** en 4 pestañas: Consola, Tokens, Semántico, Errores
 - **Indicador visual** de estado de conexión en tiempo real
+
+Motores soportados oficialmente:
+- MySQL
+- PostgreSQL
+- SQL Server
+- MongoDB
+- Cassandra CQL
 
 ## Endpoints del Backend
 
@@ -73,7 +81,9 @@ Sin `.env`, Vite proxyea `/api` a `http://localhost:8080` (configurado en `vite.
 | GET    | `/api/compiler/dialects`                  | Listar dialectos soportados|
 | POST   | `/api/compiler/analyze/lexical-syntax`    | Análisis léxico/sintáctico |
 | POST   | `/api/compiler/analyze/full`              | Análisis completo          |
-| POST   | `/api/compiler/connection/test`           | Probar conexión a BD       |
+| POST   | `/api/compiler/connection/validate`       | Validar conexión a BD      |
+
+`/api/compiler/connection/test` es un endpoint antiguo y no se usa en este frontend.
 
 ## Estructura del Proyecto
 
@@ -118,4 +128,4 @@ FrontedcompiladoresRefact/
 
 ## Tests
 
-El proyecto no incluye framework de pruebas configurado actualmente.
+El proyecto usa Vitest + Testing Library.

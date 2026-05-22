@@ -1,16 +1,18 @@
+import React from 'react'; // eslint-disable-line no-unused-vars
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, RotateCcw, HelpCircle, X } from 'lucide-react';
-import { dialects, defaultSql, defaultCql, defaultMongo } from '../../data/mockData';
+import { DIALECTS, defaultSql, defaultCql, defaultMongo, defaultMongoPipeline } from '../../data/mockData';
 
-const DEFAULTS = { MYSQL: defaultSql, POSTGRESQL: defaultSql, SQL_SERVER: defaultSql, CASSANDRA: defaultCql, MONGODB: defaultMongo };
+const DEFAULTS = { MYSQL: defaultSql, POSTGRESQL: defaultSql, SQL_SERVER: defaultSql, CASSANDRA_CQL: defaultCql, MONGODB: defaultMongo };
 
-export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
+export default function SqlEditor({ onAnalyze, onClear, onDialectChange, targetCollection, onTargetCollectionChange }) {
   const [sql, setSql] = useState(defaultSql);
   const [dialect, setDialect] = useState('MYSQL');
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSql(DEFAULTS[dialect] || defaultSql);
   }, [dialect]);
 
@@ -26,7 +28,7 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
   };
 
   const handleAnalyze = () => {
-    if (onAnalyze) onAnalyze(sql, dialect);
+    if (onAnalyze) onAnalyze(sql, dialect, targetCollection || '');
   };
 
   const handleKeyDown = (e) => {
@@ -44,7 +46,7 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
       className="rounded-[14px] border border-border bg-[rgba(255,255,255,0.94)] shadow-[0_10px_30px_rgba(15,23,42,0.08)] overflow-hidden"
     >
       <div className="flex items-center justify-between gap-4 px-5 py-[18px] border-b border-border bg-[#fbfdff]">
-        <h2 className="text-base font-bold text-text uppercase tracking-[0.4px]">Consulta</h2>
+        <h2 className="text-base font-bold text-text uppercase tracking-[0.4px]">Instruccion</h2>
         <div className="flex flex-col gap-1.5 min-w-[210px]">
           <label htmlFor="dialect" className="text-[13px] font-bold text-[#374151]">Motor de base de datos</label>
           <select
@@ -53,10 +55,9 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
             onChange={handleDialectChange}
             className="w-full border border-border bg-white text-text rounded-[10px] px-3 py-2.5 text-sm outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] transition-all"
           >
-            {dialects.map((d) => {
-              const val = d === 'SQL Server' ? 'SQL_SERVER' : d.toUpperCase();
-              return <option key={d} value={val}>{d}</option>;
-            })}
+            {DIALECTS.map((d) => (
+              <option key={d.value} value={d.value}>{d.label}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -69,6 +70,21 @@ export default function SqlEditor({ onAnalyze, onClear, onDialectChange }) {
           onChange={(e) => setSql(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+
+        {dialect === 'MONGODB' && (
+          <div className="mt-3">
+            <label htmlFor="targetCollection" className="text-[13px] font-bold text-[#374151]">Coleccion objetivo</label>
+            <input
+              id="targetCollection"
+              type="text"
+              value={targetCollection || ''}
+              onChange={(e) => onTargetCollectionChange?.(e.target.value)}
+              placeholder="orders"
+              className="mt-1 w-full border border-border bg-white text-text rounded-[10px] px-3 py-2.5 text-sm outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)] transition-all"
+            />
+            <p className="text-xs text-muted mt-1">Necesario para analisis semantico cuando se usa un pipeline MongoDB puro sin db.collection.aggregate(...).</p>
+          </div>
+        )}
 
         <div className="flex items-center justify-between flex-wrap gap-2.5 mt-3.5">
           <div className="flex flex-wrap gap-2.5">
@@ -120,9 +136,16 @@ const examples = [
     ],
   },
   {
-    title: 'MongoDB Pipeline',
+    title: 'MongoDB instruccion completa',
     examples: [
-      { label: '$match + $group', sql: '[\n  { "$match": { "status": "active" } },\n  { "$group": { "_id": "$category", "total": { "$sum": 1 } } }\n]' },
+      { label: 'find', sql: 'db.orders.find({ status: "active" })' },
+      { label: 'aggregate', sql: 'db.orders.aggregate([\n  { "$match": { "status": "active" } },\n  { "$group": { "_id": "$category", "total": { "$sum": 1 } } }\n])' },
+    ],
+  },
+  {
+    title: 'MongoDB pipeline puro',
+    examples: [
+      { label: '$match + $group', sql: defaultMongoPipeline },
       { label: '$match + $sort + $limit', sql: '[\n  { "$match": { "precio": { "$gte": 100 } } },\n  { "$sort": { "fecha": -1 } },\n  { "$limit": 10 }\n]' },
       { label: '$lookup (join)', sql: '[\n  { "$match": { "cliente_id": "123" } },\n  {\n    "$lookup": {\n      "from": "pedidos",\n      "localField": "_id",\n      "foreignField": "cliente_id",\n      "as": "pedidos"\n    }\n  }\n]' },
     ],

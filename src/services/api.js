@@ -8,11 +8,15 @@ async function request(url, options = {}) {
     ...rest,
     headers: { 'Content-Type': 'application/json', ...customHeaders },
   });
+  const body = await res.json().catch(() => null);
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `HTTP ${res.status}: ${res.statusText}`);
+    const message = body?.message || `HTTP ${res.status}: ${res.statusText}`;
+    const error = new Error(message);
+    error.status = res.status;
+    error.body = body;
+    throw error;
   }
-  return res.json();
+  return body;
 }
 
 export function checkHealth() {
@@ -23,15 +27,18 @@ export function getDialects() {
   return request(`${API_PREFIX}/dialects`);
 }
 
-export function analyzeLexicalSyntax(sql, dialect, mode = 'LEXICAL_SYNTAX', options = {}) {
+export function analyzeLexicalSyntax({ sql, dialect, mode = 'LEXICAL_SYNTAX', targetCollection = null, options = {} }) {
   return request(`${API_PREFIX}/analyze/lexical-syntax`, {
     method: 'POST',
     body: JSON.stringify({
+      requestId: crypto.randomUUID?.() || `REQ-${Date.now()}`,
       dialect,
       sql,
       analysisMode: mode,
+      targetCollection,
       options: {
         includeCommentsAsTokens: true,
+        validateSemantic: false,
         stopOnLexicalError: true,
         stopOnSyntaxError: true,
         returnTokenList: true,
@@ -42,16 +49,19 @@ export function analyzeLexicalSyntax(sql, dialect, mode = 'LEXICAL_SYNTAX', opti
   });
 }
 
-export function analyzeFull(sql, dialect, connectionConfig, options = {}) {
+export function analyzeFull({ sql, dialect, connectionConfig, targetCollection = null, options = {} }) {
   return request(`${API_PREFIX}/analyze/full`, {
     method: 'POST',
     body: JSON.stringify({
+      requestId: crypto.randomUUID?.() || `REQ-${Date.now()}`,
       dialect,
       sql,
       analysisMode: 'FULL',
+      targetCollection,
       connectionConfig,
       options: {
         includeCommentsAsTokens: true,
+        validateSemantic: true,
         stopOnLexicalError: true,
         stopOnSyntaxError: true,
         returnTokenList: true,
@@ -62,8 +72,8 @@ export function analyzeFull(sql, dialect, connectionConfig, options = {}) {
   });
 }
 
-export function testConnection(config) {
-  return request(`${API_PREFIX}/connection/test`, {
+export function validateConnection(config) {
+  return request(`${API_PREFIX}/connection/validate`, {
     method: 'POST',
     body: JSON.stringify(config),
   });
