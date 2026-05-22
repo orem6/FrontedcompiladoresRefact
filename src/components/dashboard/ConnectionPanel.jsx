@@ -1,61 +1,86 @@
-import { useState, useEffect } from 'react';
+import React from 'react'; // eslint-disable-line no-unused-vars
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plug, PlugZap } from 'lucide-react';
-import { testConnection } from '../../services/api';
+import { validateConnection } from '../../services/api';
+import { DIALECTS } from '../../data/mockData';
 
-const PORTS = { MYSQL: '3306', POSTGRESQL: '5432', SQL_SERVER: '1433', CASSANDRA: '9042', MONGODB: '27017' };
-const SQL_DIALECTS = ['MYSQL', 'POSTGRESQL', 'SQL_SERVER'];
+function getDialectConfig(dialect) {
+  return DIALECTS.find((item) => item.value === dialect);
+}
 
 export default function ConnectionPanel({ dialect, onConnectionChange }) {
+  const dialectConfig = getDialectConfig(dialect);
+  const isCassandra = dialect === 'CASSANDRA_CQL';
+  const isMongo = dialect === 'MONGODB';
+
   const [host, setHost] = useState('localhost');
-  const [port, setPort] = useState('3306');
+  const [port, setPort] = useState(dialectConfig?.defaultPort || '3306');
   const [database, setDatabase] = useState('');
-  const [username, setUsername] = useState('root');
+  const [schema, setSchema] = useState('');
+  const [username, setUsername] = useState(dialectConfig?.defaultUser || '');
   const [password, setPassword] = useState('');
+  const [localDatacenter, setLocalDatacenter] = useState('datacenter1');
+  const [useDirectJdbcUrl, setUseDirectJdbcUrl] = useState(false);
+  const [jdbcUrl, setJdbcUrl] = useState('');
   const [status, setStatus] = useState('desconectado');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (PORTS[dialect]) {
-      setPort(PORTS[dialect]);
-    }
-    if (!SQL_DIALECTS.includes(dialect)) {
-      setUsername('');
-      setPassword('');
-    } else if (!username) {
-      setUsername('root');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialect]);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const getConfig = () => ({
     dialect,
     host,
-    port: parseInt(port, 10) || 3306,
+    port: Number(port),
     database,
-    username,
+    schema: schema || null,
+    username: username || '',
     password,
+    jdbcUrl: jdbcUrl || null,
+    useDirectJdbcUrl,
+    localDatacenter: isCassandra ? localDatacenter : null,
   });
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const validateForm = () => {
+    if (!dialect) return 'Debe seleccionar un dialecto.';
+    if (!useDirectJdbcUrl && !host.trim()) return 'Host es requerido.';
+    if (!useDirectJdbcUrl && (!port.trim() || Number.isNaN(Number(port)))) return 'Puerto es requerido y numerico.';
+    if (!database.trim()) return isCassandra ? 'Keyspace es requerido.' : 'Base de datos es requerida.';
+    if (isCassandra && !localDatacenter.trim()) return 'Local Datacenter es requerido para Cassandra CQL.';
+    if (useDirectJdbcUrl && !jdbcUrl.trim()) return 'La URI directa es requerida cuando esta opcion esta habilitada.';
+    return null;
+  };
 
   const handleConnect = async () => {
+    const validationError = validateForm();
+    if (validationError) {
+      setStatus('error');
+      setErrorMessage(validationError);
+      if (onConnectionChange) onConnectionChange({ connected: false, status: 'error' });
+      return;
+    }
+
     setLoading(true);
     setStatus('conectando');
+    if (onConnectionChange) onConnectionChange({ connected: false, status: 'conectando' });
     setErrorMessage('');
     try {
-      const res = await testConnection(getConfig());
+      const config = getConfig();
+      const res = await validateConnection(config);
       if (res.valid) {
         setStatus('conectado');
         setErrorMessage('');
-        if (onConnectionChange) onConnectionChange({ ...getConfig(), connected: true });
+        if (onConnectionChange) {
+          onConnectionChange({ ...config, connected: true, status: 'conectado', connectionResult: res.connectionResult || null });
+        }
       } else {
         setStatus('error');
         setErrorMessage(res.message || 'Error de conexion a la base de datos.');
+        if (onConnectionChange) onConnectionChange({ connected: false, status: 'error' });
       }
     } catch (err) {
       setStatus('error');
       setErrorMessage(err.message || 'Error de conexion a la base de datos.');
+      if (onConnectionChange) onConnectionChange({ connected: false, status: 'error' });
     } finally {
       setLoading(false);
     }
@@ -63,6 +88,7 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
 
   const handleDisconnect = () => {
     setStatus('desconectado');
+    setErrorMessage('');
     if (onConnectionChange) onConnectionChange({ connected: false });
   };
 
@@ -96,13 +122,40 @@ export default function ConnectionPanel({ dialect, onConnectionChange }) {
           <Field label="Host" id="host" value={host} onChange={setHost} placeholder="localhost" />
           <Field label="Puerto" id="port" value={port} onChange={setPort} placeholder="3306" />
           <div className="col-span-2">
-            <Field label="Base de datos" id="database" value={database} onChange={setDatabase} placeholder="nombre_base_datos" />
+            <Field
+              label={isCassandra ? 'Keyspace' : dialect === 'MONGODB' ? 'Database' : 'Base de datos'}
+              id="database"
+              value={database}
+              onChange={setDatabase}
+              placeholder={isCassandra ? 'demo' : 'nombre_base_datos'}
+            />
           </div>
-          {SQL_DIALECTS.includes(dialect) && (
-            <Field label="Usuario" id="user" value={username} onChange={setUsername} placeholder="root" />
+          <Field label="Usuario" id="user" value={username} onChange={setUsername} placeholder={dialectConfig?.defaultUser || 'usuario'} />
+          <Field label="Contraseña" id="password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+          {(dialect === 'POSTGRESQL' || dialect === 'SQL_SERVER') && (
+            <Field
+              label="Schema (opcional)"
+              id="schema"
+              value={schema}
+              onChange={setSchema}
+              placeholder={dialect === 'POSTGRESQL' ? 'public' : 'dbo'}
+            />
           )}
-          {SQL_DIALECTS.includes(dialect) && (
-            <Field label="Contraseña" id="password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+          {isCassandra && (
+            <Field label="Local Datacenter" id="localDatacenter" value={localDatacenter} onChange={setLocalDatacenter} placeholder="datacenter1" />
+          )}
+          {isMongo && (
+            <div className="col-span-2 rounded-[10px] border border-border p-3 bg-[#fbfdff]">
+              <label className="flex items-center gap-2 text-sm font-bold text-[#374151]">
+                <input type="checkbox" checked={useDirectJdbcUrl} onChange={(e) => setUseDirectJdbcUrl(e.target.checked)} />
+                Usar URI directa MongoDB
+              </label>
+              {useDirectJdbcUrl && (
+                <div className="mt-3">
+                  <Field label="URI directa MongoDB" id="jdbcUrl" value={jdbcUrl} onChange={setJdbcUrl} placeholder="mongodb://user:pass@localhost:27017/orders_db" />
+                </div>
+              )}
+            </div>
           )}
         </div>
 
