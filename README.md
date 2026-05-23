@@ -10,12 +10,12 @@ Dashboard para un compilador SQL/NoSQL con analisis lexico, sintactico y semanti
 
 ## Stack Tecnológico
 
-| Runtime     | Dev                          |
-| ----------- | ---------------------------- |
-| React 19    | Vite 8                       |
-| React DOM 19| Tailwind CSS v4              |
-| Framer Motion 12 | ESLint 10              |
-| Lucide React 1   | @tailwindcss/vite       |
+| Runtime          | Dev               |
+| ---------------- | ----------------- |
+| React 19         | Vite 8            |
+| React DOM 19     | Tailwind CSS v4   |
+| Framer Motion 12 | ESLint 10         |
+| Lucide React 1   | @tailwindcss/vite |
 
 Lenguaje: **JavaScript (JSX)** — no usa TypeScript.
 
@@ -41,21 +41,21 @@ La aplicación se abre en `http://localhost:5173`.
 
 ## Variables de Entorno
 
-| Variable        | Valor por defecto | Descripción                     |
-| --------------- | ----------------- | ------------------------------- |
-| `VITE_API_URL`  | `/api`            | URL base del backend (proxy)    |
+| Variable       | Valor por defecto | Descripción                  |
+| -------------- | ----------------- | ---------------------------- |
+| `VITE_API_URL` | `/api`            | URL base del backend (proxy) |
 
 Sin `.env`, Vite proxyea `/api` a `http://localhost:8080` (configurado en `vite.config.js`).
 
 ## Scripts
 
-| Comando             | Descripción                           |
-| ------------------- | ------------------------------------- |
-| `npm run dev`       | Servidor de desarrollo (Vite)         |
-| `npm run build`     | Build de producción a `dist/`         |
-| `npm run preview`   | Vista previa del build de producción  |
-| `npm run lint`      | Ejecutar ESLint en todo el proyecto   |
-| `npm run test`      | Ejecutar pruebas Vitest               |
+| Comando           | Descripción                          |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Servidor de desarrollo (Vite)        |
+| `npm run build`   | Build de producción a `dist/`        |
+| `npm run preview` | Vista previa del build de producción |
+| `npm run lint`    | Ejecutar ESLint en todo el proyecto  |
+| `npm run test`    | Ejecutar pruebas Vitest              |
 
 ## Funcionalidades
 
@@ -67,6 +67,7 @@ Sin `.env`, Vite proxyea `/api` a `http://localhost:8080` (configurado en `vite.
 - **Indicador visual** de estado de conexión en tiempo real
 
 Motores soportados oficialmente:
+
 - MySQL
 - PostgreSQL
 - SQL Server
@@ -75,13 +76,13 @@ Motores soportados oficialmente:
 
 ## Endpoints del Backend
 
-| Método | Endpoint                                  | Uso                        |
-| ------ | ----------------------------------------- | -------------------------- |
-| GET    | `/api/compiler/health`                    | Health check               |
-| GET    | `/api/compiler/dialects`                  | Listar dialectos soportados|
-| POST   | `/api/compiler/analyze/lexical-syntax`    | Análisis léxico/sintáctico |
-| POST   | `/api/compiler/analyze/full`              | Análisis completo          |
-| POST   | `/api/compiler/connection/validate`       | Validar conexión a BD      |
+| Método | Endpoint                               | Uso                         |
+| ------ | -------------------------------------- | --------------------------- |
+| GET    | `/api/compiler/health`                 | Health check                |
+| GET    | `/api/compiler/dialects`               | Listar dialectos soportados |
+| POST   | `/api/compiler/analyze/lexical-syntax` | Análisis léxico/sintáctico  |
+| POST   | `/api/compiler/analyze/full`           | Análisis completo           |
+| POST   | `/api/compiler/connection/validate`    | Validar conexión a BD       |
 
 `/api/compiler/connection/test` es un endpoint antiguo y no se usa en este frontend.
 
@@ -119,13 +120,18 @@ FrontedcompiladoresRefact/
 
 ## Solución de Problemas
 
-| Problema                           | Causa probable                  | Solución                                         |
-| ---------------------------------- | ------------------------------- | ------------------------------------------------ |
-| `npm install` falla                | Node.js versión incorrecta      | Usar Node.js 18+ (`nvm use` si tienes `.nvmrc`)  |
-| Error de conexión al analizar      | Backend no está corriendo       | Iniciar el backend Spring Boot en `:8080`        |
-| CORS en consola del navegador      | Backend sin configuración CORS  | El proxy de Vite lo maneja en desarrollo         |
-| Puerto ocupado                     | Otro proceso en `:5173`         | `npx vite --port 3000` o cambiar en `vite.config.js` |
+| Problema                      | Causa probable                 | Solución                                             |
+| ----------------------------- | ------------------------------ | ---------------------------------------------------- |
+| `npm install` falla           | Node.js versión incorrecta     | Usar Node.js 18+ (`nvm use` si tienes `.nvmrc`)      |
+| Error de conexión al analizar | Backend no está corriendo      | Iniciar el backend Spring Boot en `:8080`            |
+| CORS en consola del navegador | Backend sin configuración CORS | El proxy de Vite lo maneja en desarrollo             |
+| Puerto ocupado                | Otro proceso en `:5173`        | `npx vite --port 3000` o cambiar en `vite.config.js` |
 
 ## Tests
 
 El proyecto usa Vitest + Testing Library.
+
+## Enlace al backend
+
+La guía de instalación y ejecucion asi como tambien el proyecto del backend se encuentra en el siguiente repositorio:
+`https://github.com/orem6/compiladoresRefact.git`
