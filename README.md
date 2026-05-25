@@ -82,9 +82,7 @@ Motores soportados oficialmente:
 | GET    | `/api/compiler/dialects`               | Listar dialectos soportados |
 | POST   | `/api/compiler/analyze/lexical-syntax` | Análisis léxico/sintáctico  |
 | POST   | `/api/compiler/analyze/full`           | Análisis completo           |
-| POST   | `/api/compiler/connection/validate`    | Validar conexión a BD       |
-
-`/api/compiler/connection/test` es un endpoint antiguo y no se usa en este frontend.
+| POST   | `/api/compiler/connection/test`    | Validar conexión a BD       |
 
 ## Estructura del Proyecto
 
